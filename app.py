@@ -69,7 +69,7 @@ def process_csv_toast(file, progress_bar=None):
     return pd.DataFrame(violations)
 
 # === Configuración Streamlit ===
-st.set_page_config(page_title="Meal Violations Toast", page_icon="🌮", layout="wide")
+st.set_page_config(page_title="Meal Violations Toast", page_icon="❗", layout="wide")
 
 # Sidebar
 st.sidebar.title("Menú Principal")
@@ -120,7 +120,7 @@ st.markdown("""
 # === Dashboard principal ===
 if menu == "Dashboard":
     st.markdown("""
-        <h1 style='text-align: center; color: #343a40;'>🌮 Meal Violations Tacos Franc</h1>
+        <h1 style='text-align: center; color: #343a40;'>❗ Meal Violations Detector </h1>
         <p style='text-align: center; color: #6c757d;'>Based on Toast Time Entries CSV – By Jordan Memije</p>
         <hr style='margin-top: 0px;'>
     """, unsafe_allow_html=True)
