@@ -41,7 +41,7 @@ def process_csv_toast(file, progress_bar=None):
     df["Date"] = df["Clock In"].dt.date
 
     # Limpiar espacios y convertir 'Break Duration' a numérico, manejar los errores de conversión
-    df["Break Duration"] = pd.to_numeric(df["Break Duration"], errors='coerce')  # Convertimos a numérico, 'MISSED' se convertirá en NaN
+    df["Break Duration"] = pd.to_numeric(df["Break Duration"], errors='coerce')  # 'MISSED' -> NaN
 
     grouped = df.groupby(["Employee", "Date"])  # Agrupar por empleado y fecha
     violations = []
@@ -51,12 +51,12 @@ def process_csv_toast(file, progress_bar=None):
         total_hours = group["Total Hours"].sum()
 
         # Excluir las filas donde 'Break Duration' sea NaN o vacía
-        missed_break = group[(group["Break Duration"].isna()) | 
-                             (group["Break Duration"] < 0.50) |  # Ahora es menor a 0.50 horas
+        missed_break = group[(group["Break Duration"].isna()) |
+                             (group["Break Duration"] < 0.50) |
                              (group["Break Duration"] == "MISSED")]
 
         # Si hay violaciones de comida Y las horas totales son mayores a 6
-        if not missed_break.empty and total_hours > 6:  # Condición adicional para Total Hours
+        if not missed_break.empty and total_hours > 6:
             violations.append({
                 "Nombre": name,
                 "Date": date,
@@ -73,7 +73,8 @@ st.set_page_config(page_title="Meal Violations Toast", page_icon="❗", layout="
 
 # Sidebar
 st.sidebar.title("Menú Principal")
-menu = st.sidebar.radio("Navegación", ("Dashboard", "Configuración"))
+# ➕ Añadimos la nueva pestaña "Instrucciones"
+menu = st.sidebar.radio("Navegación", ("Dashboard", "Instrucciones", "Configuración"))
 
 # === Estilos Freedash ===
 st.markdown("""
@@ -82,38 +83,18 @@ st.markdown("""
         background-color: #f4f6f9;
     }
     header, footer {visibility: hidden;}
-    .block-container {
-        padding-top: 2rem;
-    }
+    .block-container { padding-top: 2rem; }
     .metric-card {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        text-align: center;
+        background: white; padding: 20px; border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;
     }
-    .card-title {
-        font-size: 18px;
-        color: #6c757d;
-        margin-bottom: 0.5rem;
-    }
-    .card-value {
-        font-size: 30px;
-        font-weight: bold;
-        color: #343a40;
-    }
+    .card-title { font-size: 18px; color: #6c757d; margin-bottom: 0.5rem; }
+    .card-value { font-size: 30px; font-weight: bold; color: #343a40; }
     .stButton > button {
-        background-color: #009efb;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-weight: bold;
+        background-color: #009efb; color: white; padding: 0.75rem 1.5rem;
+        border: none; border-radius: 8px; font-weight: bold;
     }
-    .stButton > button:hover {
-        background-color: #007acc;
-        color: white;
-    }
+    .stButton > button:hover { background-color: #007acc; color: white; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -204,6 +185,50 @@ if menu == "Dashboard":
 
     else:
         st.info("📤 Por favor sube un archivo CSV exportado desde Toast para comenzar.")
+
+elif menu == "Instrucciones":
+    st.markdown("""
+        <h1 style='text-align: center; color: #343a40;'>📘 Cómo usar la herramienta</h1>
+        <p style='text-align: center; color: #6c757d;'>
+            Sigue estos pasos para generar y subir el archivo correcto y leer los resultados.
+        </p>
+        <hr>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### 1) Generar el CSV en Toast")
+    st.markdown("""
+    - Entra a **Reports** → **Employee Performance** → **Time Entry Management**.  
+    - **Selecciona todas las columnas** del reporte.  
+    - Exporta en formato **CSV**.  
+    - Ese archivo es el que usarás en esta app para analizar las *meal violations*.
+    """)
+
+    st.markdown("### 2) Subir y analizar en la app")
+    st.markdown("""
+    - Ve a la pestaña **Dashboard** (menú lateral).  
+    - En **📤 Sube tu archivo CSV de Time Entries**, selecciona el CSV exportado desde Toast.  
+    - Espera a que la barra de progreso termine el análisis.  
+    - Verás:
+        - **Resumen General** (violaciones, empleados afectados, días analizados).  
+        - **Detalle de Violaciones** (tabla con fechas y horas).  
+        - **Gráfica** de violaciones por empleado.  
+        - Alerta si hay empleados con **> 10 violaciones**.  
+        - Botón para **⬇️ descargar** resultados en CSV.
+    """)
+
+    with st.expander("ℹ️ Consejos y notas"):
+        st.markdown("""
+        - No modifiques el CSV antes de subirlo.  
+        - Si el archivo no carga, confirma que proviene de **Time Entry Management** y que incluye todas las columnas.  
+        - Esta app solo analiza **meal violations** con base en la información exportada por Toast.
+        """)
+
+    st.markdown("---")
+    st.markdown("""
+    **Acceso web directo:**  
+    Si no quieres instalar nada, puedes abrir la app aquí:  
+    <a href="https://mealviolationtoastdev.streamlit.app/" target="_blank">https://mealviolationtoastdev.streamlit.app/</a>
+    """, unsafe_allow_html=True)
 
 elif menu == "Configuración":
     st.markdown("# ⚙️ Configuración")
